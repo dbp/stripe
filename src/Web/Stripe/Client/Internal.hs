@@ -114,7 +114,7 @@ callAPI StripeRequest{..} = do
       http method $ "/v1/" <> reqURL
       setAuthorizationBasic secretKey mempty
       setContentType "application/x-www-form-urlencoded"
-      setHeader "Stripe-Version" (toBytestring V20141007)
+      setHeader "Stripe-Version" (toBytestring V20150218)
       setHeader "Connection" "Keep-Alive"
     body <- Streams.fromByteString reqBody
     sendRequest conn req $ inputStreamBody body

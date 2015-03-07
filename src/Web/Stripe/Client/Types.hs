@@ -46,8 +46,10 @@ data StripeConfig = StripeConfig
 -- | API Version
 data APIVersion =
     V20141007 -- ^ Stripe API Version for this package release
+  | V20150218 -- ^ Stripe API Version for this package release
     deriving Eq
 
 instance Show APIVersion where
     show V20141007 = "2014-10-07"
+    show V20150218 = "2015-02-18"
 
