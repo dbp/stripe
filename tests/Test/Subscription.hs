@@ -12,6 +12,7 @@ import           Test.Util
 import           Web.Stripe
 import           Web.Stripe.Subscription
 import           Web.Stripe.Customer
+import           Web.Stripe.Token
 import           Web.Stripe.Plan
 import           Web.Stripe.Coupon
 
@@ -33,6 +34,22 @@ subscriptionTests config = do
         void $ deleteCustomer cid
         return sub
       result `shouldSatisfy` isRight
+    it "Succesfully creates a Subscription via a token" $ do
+      planid <- makePlanId
+      sub <- stripe config $ do
+        Customer { customerId = cid } <- createEmptyCustomer
+        Token { tokenId = tokenid } <- createCardToken cn em ey cvc
+        void $ createPlan planid
+                        0 -- free plan
+                        USD
+                        Month
+                        "sample plan"
+                        []
+        result <- createSubscriptionWithTokenId cid planid tokenid []
+        void $ deletePlan planid
+        void $ deleteCustomer cid
+        return result
+      sub `shouldSatisfy` isRight
     it "Succesfully retrieves a Subscription" $ do
       planid <- makePlanId
       result <- stripe config $ do
@@ -155,3 +172,9 @@ subscriptionTests config = do
       result `shouldSatisfy` isRight
       let Right Subscription {..} = result
       subscriptionStatus `shouldBe` Canceled
+  where
+    cn  = CardNumber "4242424242424242"
+    em  = ExpMonth 12
+    ey  = ExpYear 2015
+    cvc = CVC "123"
+

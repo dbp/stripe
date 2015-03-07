@@ -34,6 +34,7 @@
 module Web.Stripe.Subscription
     ( -- * API
       createSubscription
+    , createSubscriptionWithTokenId
     , getSubscription
     , getSubscriptionExpandable
     , getSubscriptions
@@ -60,7 +61,7 @@ import           Web.Stripe.Types           (CustomerId (..), EndingBefore,
                                              PlanId (..), StartingAfter, CouponId(..),
                                              Subscription (..), StripeList(..),
                                              SubscriptionId (..), Coupon(..),
-                                             SubscriptionStatus (..))
+                                             SubscriptionStatus (..), TokenId (..))
 import           Web.Stripe.Types.Util      (getCustomerId)
 
 ------------------------------------------------------------------------------
@@ -77,6 +78,25 @@ createSubscription
   where request = StripeRequest POST url params
         url     = "customers" </> getCustomerId customerid </> "subscriptions"
         params  = toMetaData metadata ++ getParams [ ("plan", Just planid)  ]
+
+------------------------------------------------------------------------------
+-- | Create a `Subscription` by `CustomerId` and `TokenId`
+createSubscriptionWithTokenId
+    :: CustomerId -- ^ The `CustomerId` upon which to create the `Subscription`
+    -> PlanId     -- ^ The `PlanId` to associate the `Subscription` with
+    -> TokenId    -- ^ The `TokenId` to associate the `Subscription` with
+    -> MetaData   -- ^ The `MetaData` associated with the `Subscription`
+    -> Stripe Subscription
+createSubscriptionWithTokenId
+    customerid
+    (PlanId planid)
+    (TokenId tokenid)
+    metadata    = callAPI request
+  where request = StripeRequest POST url params
+        url     = "customers" </> getCustomerId customerid </> "subscriptions"
+        params  = toMetaData metadata ++ getParams [ ("plan", Just planid)
+                                                   , ("source", Just tokenid)
+                                                   ]
 
 ------------------------------------------------------------------------------
 -- | Retrieve a `Subscription` by `CustomerId` and `SubscriptionId`
